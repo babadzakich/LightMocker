@@ -2,13 +2,15 @@ package ru.nsu.core.model;
 
 import ru.nsu.core.answer.Answer;
 
+import java.lang.reflect.Method;
+
 public class StubRule {
-    Invocation invocation;
+    Method method;
     Object[] expectedArgs;
     Answer<?> answer;
 
     boolean matches(Invocation invocation) {
-        if (!this.invocation.method.equals(invocation.method)) {
+        if (!method.equals(invocation.method)) {
             return false;
         }
         if (expectedArgs.length != invocation.args.length) {
