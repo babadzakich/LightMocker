@@ -9,6 +9,10 @@ public class StubRule {
     Object[] expectedArgs;
     Answer<?> answer;
 
+    public Answer<?> getAnswer() {
+        return answer;
+    }
+
     boolean matches(Invocation invocation) {
         if (!method.equals(invocation.method)) {
             return false;
