@@ -31,7 +31,9 @@ public class MockProxyFactory {
                         .newInstance();
             } catch (Exception e) {
                 System.err.println("Failed to mock class: " + clazz.getName() + " " + e.getMessage());
+                return null;
             }
         }
+
     }
 }

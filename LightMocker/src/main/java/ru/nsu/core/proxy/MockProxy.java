@@ -18,8 +18,6 @@ public class MockProxy implements InvocationHandler {
         invocation.setArgs((args == null) ? new Object[0] : args);
         invocation.setTimestamp(System.currentTimeMillis());
 
-        MockState.lastInvocation.set(invocation);
-        MockState.lastMock.set(proxy);
 
         InvocationRegistry.record(proxy, invocation);
 
