@@ -3,9 +3,9 @@ package ru.nsu.core.model;
 import java.lang.reflect.Method;
 
 public class Invocation {
-    Method method;
-    Object[] args;
-    long timestamp;
+    private Method method;
+    private Object[] args;
+    private long timestamp;
 
     public Method getMethod() {
         return method;
