@@ -30,7 +30,7 @@ public class MockProxyFactory {
                         .getDeclaredConstructor()
                         .newInstance();
             } catch (Exception e) {
-                throw new RuntimeException("Failed to mock class: " + clazz.getName(), e);
+                System.err.println("Failed to mock class: " + clazz.getName() + " " + e.getMessage());
             }
         }
     }
