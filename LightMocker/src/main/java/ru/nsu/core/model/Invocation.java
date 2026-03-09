@@ -1,10 +1,15 @@
 package ru.nsu.core.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.lang.reflect.Method;
 
 /**
  * Represent a single method invocation on a mock object.
  */
+@Getter
+@Setter
 public class Invocation {
     private final Object mockInstance;
     private final Method method;
@@ -18,19 +23,5 @@ public class Invocation {
         this.timestamp = System.nanoTime();
     }
 
-    public Object getMockInstance() {
-        return mockInstance;
-    }
 
-    public Method getMethod() {
-        return method;
-    }
-
-    public Object[] getArgs() {
-        return args;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
 }
