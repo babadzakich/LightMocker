@@ -1,5 +1,7 @@
 package ru.nsu.dsl.ref;
 
+import net.bytebuddy.asm.Advice;
+
 import java.io.Serializable;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Method;

@@ -8,23 +8,23 @@ import ru.nsu.core.state.MockState;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 public class MockProxy implements InvocationHandler {
 
+    InvocationRegistry invocationRegistry = new InvocationRegistry();
+    StubRegistry stubRegistry = new StubRegistry();
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        Invocation invocation = new Invocation();
-        invocation.setMethod(method);
-        invocation.setArgs((args == null) ? new Object[0] : args);
-        invocation.setTimestamp(System.currentTimeMillis());
+        Invocation invocation = new Invocation(proxy, method, args);
 
 
-        InvocationRegistry.record(proxy, invocation);
+        invocationRegistry.registerInvocation(proxy, invocation);
 
-        StubRule rule = StubRegistry.findRule(proxy, invocation);
+        Optional<StubRule> rule = stubRegistry.findMatchingRule(proxy, invocation);
 
         if (rule != null) {
-            return rule.getAnswer().answer(invocation);
+            return rule.get().getAnswer().answer(invocation);
         }
 
         return getDefaultValue(method.getReturnType());
