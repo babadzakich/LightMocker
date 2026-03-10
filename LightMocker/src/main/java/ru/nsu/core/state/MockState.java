@@ -1,6 +1,5 @@
 package ru.nsu.core.state;
 
-import lombok.Getter;
 import ru.nsu.core.registry.InvocationRegistry;
 import ru.nsu.core.registry.StubRegistry;
 
@@ -8,15 +7,24 @@ import ru.nsu.core.registry.StubRegistry;
  * Global state for the mocking framework.
  * Provides access to the registries for invocations and stubbing rules.
  */
-@Getter
 public class MockState {
-    @Getter
-    private static final MockState Instance = new MockState();
+    private static final MockState INSTANCE = new MockState();
 
     private final InvocationRegistry invocationRegistry = new InvocationRegistry();
     private final StubRegistry stubRegistry = new StubRegistry();
 
-    private MockState() {
+    private MockState() {}
+
+    public static MockState getInstance() {
+        return INSTANCE;
+    }
+
+    public InvocationRegistry getInvocationRegistry() {
+        return invocationRegistry;
+    }
+
+    public StubRegistry getStubRegistry() {
+        return stubRegistry;
     }
 
     /**

@@ -1,6 +1,5 @@
 package ru.nsu.core.model;
 
-import lombok.Getter;
 import ru.nsu.core.answer.Answer;
 
 import java.lang.reflect.Method;
@@ -10,10 +9,8 @@ import java.util.Objects;
  * Represents a rule for mock behavior.
  */
 public class StubRule {
-    @Getter
     private final Method method;
     private final Object[] expectedArgs;
-    @Getter
     private final Answer<?> answer;
 
     public StubRule(Method method, Object[] expectedArgs, Answer<?> answer) {
@@ -21,6 +18,9 @@ public class StubRule {
         this.expectedArgs = expectedArgs != null ? expectedArgs : new Object[0];
         this.answer = answer;
     }
+
+    public Method getMethod()    { return method; }
+    public Answer<?> getAnswer() { return answer; }
 
     /**
      * Checks if this rule matches the given invocation.

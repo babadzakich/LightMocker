@@ -11,7 +11,7 @@ import ru.nsu.exception.MockerException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
-public class SetupBuilder {
+public class SetupBuilder<T, R> {
     private final Object mock;
     private final Method method;
     private Object[] args = new Object[0];
@@ -28,7 +28,7 @@ public class SetupBuilder {
         this.method = resolveMethod(mock, methodName, paramTypes);
     }
 
-    public SetupBuilder withArgs(Object... args) {
+    public SetupBuilder<T, R> withArgs(Object... args) {
         this.args = args;
         return this;
     }
