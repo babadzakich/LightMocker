@@ -2,8 +2,6 @@ package ru.nsu.core.proxy;
 
 import ru.nsu.core.model.Invocation;
 import ru.nsu.core.model.StubRule;
-import ru.nsu.core.registry.InvocationRegistry;
-import ru.nsu.core.registry.StubRegistry;
 import ru.nsu.core.state.MockState;
 
 import java.lang.reflect.InvocationHandler;
@@ -11,19 +9,17 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 
 public class MockProxy implements InvocationHandler {
-
-    InvocationRegistry invocationRegistry = new InvocationRegistry();
-    StubRegistry stubRegistry = new StubRegistry();
+    private final MockState state = MockState.getInstance();
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Invocation invocation = new Invocation(proxy, method, args);
 
 
-        invocationRegistry.registerInvocation(proxy, invocation);
+        state.getInvocationRegistry().registerInvocation(proxy, invocation);
 
-        Optional<StubRule> rule = stubRegistry.findMatchingRule(proxy, invocation);
+        Optional<StubRule> rule = state.getStubRegistry().findMatchingRule(proxy, invocation);
 
-        if (rule != null) {
+        if (rule.isPresent()) {
             return rule.get().getAnswer().answer(invocation);
         }
 

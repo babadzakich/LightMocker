@@ -1,5 +1,6 @@
 package ru.nsu.core.model;
 
+import lombok.Getter;
 import ru.nsu.core.answer.Answer;
 
 import java.lang.reflect.Method;
@@ -9,8 +10,10 @@ import java.util.Objects;
  * Represents a rule for mock behavior.
  */
 public class StubRule {
+    @Getter
     private final Method method;
     private final Object[] expectedArgs;
+    @Getter
     private final Answer<?> answer;
 
     public StubRule(Method method, Object[] expectedArgs, Answer<?> answer) {
@@ -23,7 +26,7 @@ public class StubRule {
      * Checks if this rule matches the given invocation.
      */
     public boolean matches(Invocation invocation) {
-        if (!method.equals(invocation.getMethod())) {
+        if (!methodsMatch(method, invocation.getMethod())) {
             return false;
         }
 
@@ -40,11 +43,12 @@ public class StubRule {
         return true;
     }
 
-    public Answer<?> getAnswer() {
-        return answer;
-    }
-
-    public Method getMethod() {
-        return method;
+    /**
+     * Сравнивает методы по имени и типам параметров (игнорируя declaringClass).
+     * Нужно потому что ByteBuddy subclass может иметь другой declaringClass.
+     */
+    private boolean methodsMatch(Method a, Method b) {
+        return a.getName().equals(b.getName())
+                && java.util.Arrays.equals(a.getParameterTypes(), b.getParameterTypes());
     }
 }

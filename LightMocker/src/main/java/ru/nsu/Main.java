@@ -1,17 +1,22 @@
 package ru.nsu;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import java.util.ArrayList;
+
 public class Main {
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+        ArrayList<Integer> list = CustomUltimateMocker.create(ArrayList.class);
+        System.out.println("mock class: " + list.getClass());
+        System.out.println("mock is null: " + (list == null));
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
-        }
+        // метод с аргументами — через имя + типы
+        CustomUltimateMocker.setup(list, "get", int.class)
+                .withArgs(0)
+                .returns(42);
+
+        Object result = list.get(0);
+        System.out.println("result: " + result);
+        System.out.println("result is null: " + (result == null));
     }
 }
+
+
