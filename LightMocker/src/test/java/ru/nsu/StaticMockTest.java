@@ -45,6 +45,7 @@ public class StaticMockTest {
 
     @Test
     void testStaticMockNoArgs() throws Throwable {
+        //privet medved
         try (var mock = CustomUltimateMocker.mockStatic(MathUtils.class)) {
             mock.setup("getAnswer")
                     .returns(999);
