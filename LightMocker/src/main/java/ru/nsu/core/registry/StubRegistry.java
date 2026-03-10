@@ -10,12 +10,12 @@ import java.util.*;
  */
 public class StubRegistry {
     // IdentityHashMap ensures that mocks are distinguished by reference equality
-    private final Map<Object, List<StubRule>> stubRulesMap = new IdentityHashMap<>();
+    private static final Map<Object, List<StubRule>> stubRulesMap = new IdentityHashMap<>();
 
     /**
      * Registers a new stubbing rule for a mock.
      */
-    public void registerRule(Object mock, StubRule rule) {
+    public static void registerRule(Object mock, StubRule rule) {
         stubRulesMap.computeIfAbsent(mock, k -> new ArrayList<>()).add(rule);
     }
 

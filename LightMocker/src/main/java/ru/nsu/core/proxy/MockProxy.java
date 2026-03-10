@@ -16,14 +16,12 @@ public class MockProxy implements InvocationHandler {
     StubRegistry stubRegistry = new StubRegistry();
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        Invocation invocation = new Invocation(proxy, method, args);
-
-
+        Invocation invocation = new Invocation(method, args);
         invocationRegistry.registerInvocation(proxy, invocation);
 
         Optional<StubRule> rule = stubRegistry.findMatchingRule(proxy, invocation);
 
-        if (rule != null) {
+        if (rule.isPresent()) {
             return rule.get().getAnswer().answer(invocation);
         }
 
