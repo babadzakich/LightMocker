@@ -7,24 +7,24 @@ import java.util.List;
 
 public class MockTest {
 
-    CustomUltimateMocker cum = new CustomUltimateMocker();
+    CustomUltimateMocker mock = new CustomUltimateMocker();
 
     @Test
     void test() {
 
-        List<Integer> mockList = cum.create(List.class);
-        cum.setup(mockList, List::size)
+        List<Integer> mockList = mock.create(List.class);
+        mock.setup(mockList, List::size)
                 .returns(100);
 
-        cum.setup(mockList, List::get)
+        mock.setup(mockList, List::get)
                 .withArgs(0)
                 .returns(777);
 
-        cum.setup(mockList, List::get)
+        mock.setup(mockList, List::get)
                 .withArgs(1)
                 .returns(999);
 
-        cum.setup(mockList, List::get)
+        mock.setup(mockList, List::get)
                 .withArgs(-1)
                 .thenThrow(new IndexOutOfBoundsException("absolute cinema"));
 
