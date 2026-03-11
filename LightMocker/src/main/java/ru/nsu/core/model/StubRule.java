@@ -19,11 +19,14 @@ public class StubRule {
         this.answer = answer;
     }
 
+    public Method getMethod()    { return method; }
+    public Answer<?> getAnswer() { return answer; }
+
     /**
      * Checks if this rule matches the given invocation.
      */
     public boolean matches(Invocation invocation) {
-        if (!method.equals(invocation.getMethod())) {
+        if (!methodsMatch(method, invocation.getMethod())) {
             return false;
         }
 
@@ -40,11 +43,12 @@ public class StubRule {
         return true;
     }
 
-    public Answer<?> getAnswer() {
-        return answer;
-    }
-
-    public Method getMethod() {
-        return method;
+    /**
+     * Сравнивает методы по имени и типам параметров (игнорируя declaringClass).
+     * Нужно потому что ByteBuddy subclass может иметь другой declaringClass.
+     */
+    private boolean methodsMatch(Method a, Method b) {
+        return a.getName().equals(b.getName())
+                && java.util.Arrays.equals(a.getParameterTypes(), b.getParameterTypes());
     }
 }

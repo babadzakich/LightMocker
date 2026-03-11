@@ -13,8 +13,7 @@ public class MockState {
     private final InvocationRegistry invocationRegistry = new InvocationRegistry();
     private final StubRegistry stubRegistry = new StubRegistry();
 
-    private MockState() {
-    }
+    private MockState() {}
 
     public static MockState getInstance() {
         return INSTANCE;
