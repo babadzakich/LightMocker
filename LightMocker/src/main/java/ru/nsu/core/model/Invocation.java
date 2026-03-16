@@ -11,13 +11,13 @@ import java.lang.reflect.Method;
 @Getter
 @Setter
 public class Invocation {
-    //private final Object mockInstance;
+    private final Object mockInstance;
     private final Method method;
     private final Object[] args;
     private final long timestamp;
 
-    public Invocation(Method method, Object[] args) {
-        //this.mockInstance = mockInstance;
+    public Invocation(Object mockInstance, Method method, Object[] args) {
+        this.mockInstance = mockInstance;
         this.method = method;
         this.args = args != null ? args : new Object[0];
         this.timestamp = System.nanoTime();
