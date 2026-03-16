@@ -10,10 +10,28 @@ import java.util.Optional;
 
 public class MockProxy implements InvocationHandler {
     private final MockState state = MockState.getInstance();
+
+    private static final ThreadLocal<Invocation> lastInvocation = new ThreadLocal<>();
+
+
+    private static final ThreadLocal<Object> lastMock = new ThreadLocal<>();
+
+    public static Invocation getLastInvocation() {
+        Invocation inv = lastInvocation.get();
+        lastInvocation.remove(); // Забираем один раз
+        return inv;
+    }
+
+    public static Object getLastMock() {
+        return lastMock.get();
+    }
+
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Invocation invocation = new Invocation(proxy, method, args);
 
+        lastInvocation.set(invocation);
+        lastMock.set(proxy);
 
         state.getInvocationRegistry().registerInvocation(proxy, invocation);
 
