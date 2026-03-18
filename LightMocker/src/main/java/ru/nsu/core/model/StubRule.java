@@ -23,7 +23,11 @@ public class StubRule {
      * Checks if this rule matches the given invocation.
      */
     public boolean matches(Invocation invocation) {
-        if (!method.equals(invocation.getMethod())) {
+        Method invokedMethod = invocation.getMethod();
+        if (!method.getName().equals(invokedMethod.getName())) {
+            return false;
+        }
+        if (!java.util.Arrays.equals(method.getParameterTypes(), invokedMethod.getParameterTypes())) {
             return false;
         }
 

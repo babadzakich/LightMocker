@@ -1,39 +1,44 @@
 package ru.nsu;
 
 import ru.nsu.core.proxy.MockProxyFactory;
-
-import ru.nsu.dsl.ref.MethodRef;
-import ru.nsu.dsl.ref.MethodRef1;
-import ru.nsu.dsl.ref.MethodRefExtractor;
-
-import ru.nsu.dsl.ref.MethodRefInt;
 import ru.nsu.dsl.setup.SetupBuilder;
+import ru.nsu.dsl.verify.VerificationBuilder;
+import ru.nsu.exception.MockerException;
 
-import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 public class CustomUltimateMocker {
 
-    public <T> T create(Class<T> clazz) {
+    public static <T> T create(Class<T> clazz) {
         return MockProxyFactory.createMock(clazz);
     }
 
-    public <T, R> SetupBuilder<T, R> setup(T mock, MethodRef<T, R> ref) {
-        return createSetup(mock, ref);
+    public static SetupBuilder<?> setup(Object mock, String methodName, Class<?>... paramTypes) {
+        return new SetupBuilder<>(mock, methodName, paramTypes);
     }
 
-    public <T, R> SetupBuilder<T, R> setup(T mock, MethodRefInt<T, R> ref) {
-        return createSetup(mock, ref);
+    public static VerificationBuilder verify(Object mock, String methodName, Class<?>... paramTypes) {
+        Method method = resolveMethod(mock, methodName, paramTypes);
+        return new VerificationBuilder(mock, method);
     }
 
-    //тут я хз как назвать, т.к. иначе ide ругается на двусмысленность
-    public <T, P1, R> SetupBuilder<T, R> setup2(T mock, MethodRef1<T, P1, R> ref) {
-        return createSetup(mock, ref);
+    private static Method resolveMethod(Object mock, String methodName, Class<?>... paramTypes) {
+        Class<?> clazz = mock.getClass();
+        while (clazz != null) {
+            try {
+                return clazz.getDeclaredMethod(methodName, paramTypes);
+            } catch (NoSuchMethodException e) {
+                // keep searching in superclass chain
+            }
+            clazz = clazz.getSuperclass();
+        }
+        try {
+            return mock.getClass().getMethod(methodName, paramTypes);
+        } catch (NoSuchMethodException e) {
+            throw new MockerException("Method not found: " + methodName
+                    + " with params " + Arrays.toString(paramTypes)
+                    + " on " + mock.getClass().getName());
+        }
     }
-
-    private <T, R> SetupBuilder<T, R> createSetup(T mock, Serializable lambda) {
-        Method method = MethodRefExtractor.extract(lambda);
-        return new SetupBuilder<>(mock, method);
-    }
-
 }

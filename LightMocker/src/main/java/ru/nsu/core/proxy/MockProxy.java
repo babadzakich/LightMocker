@@ -12,10 +12,26 @@ import java.util.Optional;
 
 public class MockProxy implements InvocationHandler {
 
-    InvocationRegistry invocationRegistry = new InvocationRegistry();
-    StubRegistry stubRegistry = new StubRegistry();
+    private final InvocationRegistry invocationRegistry = MockState.getInstance().getInvocationRegistry();
+    private final StubRegistry stubRegistry = MockState.getInstance().getStubRegistry();
+
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        // Handle Object methods explicitly to keep proxy identity/hash stable in registries.
+        if (method.getDeclaringClass() == Object.class) {
+            String name = method.getName();
+            if ("hashCode".equals(name)) {
+                return System.identityHashCode(proxy);
+            }
+            if ("equals".equals(name)) {
+                Object other = (args != null && args.length > 0) ? args[0] : null;
+                return proxy == other;
+            }
+            if ("toString".equals(name)) {
+                return "Mock(" + proxy.getClass().getName() + ")@" + Integer.toHexString(System.identityHashCode(proxy));
+            }
+        }
+
         Invocation invocation = new Invocation(method, args);
         invocationRegistry.registerInvocation(proxy, invocation);
 
