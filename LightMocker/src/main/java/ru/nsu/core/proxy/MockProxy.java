@@ -13,6 +13,15 @@ import java.util.Optional;
 public class MockProxy implements InvocationHandler {
     private final InvocationRegistry invocationRegistry = MockState.getInstance().getInvocationRegistry();
     private final StubRegistry stubRegistry = MockState.getInstance().getStubRegistry();
+    private final Object target;
+
+    public MockProxy() {
+        this.target = null;
+    }
+
+    public MockProxy(Object target) {
+        this.target = target;
+    }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -28,7 +37,7 @@ public class MockProxy implements InvocationHandler {
                     return proxy == other;
                 }
                 case "toString" -> {
-                    return "Mock(" + proxy.getClass().getName() + ")@" + Integer.toHexString(System.identityHashCode(proxy));
+                    return (target != null ? "Spy(" : "Mock(") + proxy.getClass().getName() + ")@" + Integer.toHexString(System.identityHashCode(proxy));
                 }
             }
         }
@@ -40,6 +49,11 @@ public class MockProxy implements InvocationHandler {
 
         if (rule.isPresent()) {
             return rule.get().getAnswer().answer(invocation);
+        }
+
+        if (target != null) {
+            method.setAccessible(true);
+            return method.invoke(target, args);
         }
 
         return getDefaultValue(method.getReturnType());

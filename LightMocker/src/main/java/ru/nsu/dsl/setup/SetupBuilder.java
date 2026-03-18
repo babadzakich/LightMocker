@@ -67,21 +67,37 @@ public class SetupBuilder<R> {
     }
 
     private void resolveMethodByArgs() {
-        List<Method> matched = candidates.stream()
+        List<Method> compatible = candidates.stream()
                 .filter(m -> MethodUtils.isCompatible(m, args))
                 .toList();
 
-        if (matched.isEmpty()) {
+        if (compatible.isEmpty()) {
              throw new MockerException(
                     "No method found for " + methodName + " with args " + Arrays.deepToString(args) +
                     " on " + mock.getClass().getName());
         }
-        if (matched.size() > 1) {
+
+        // De-duplicate by signature (name + parameter types), keeping the first (most specific) one.
+        List<Method> uniqueSignatures = new ArrayList<>();
+        for (Method m : compatible) {
+            boolean duplicate = false;
+            for (Method existing : uniqueSignatures) {
+                if (Arrays.equals(m.getParameterTypes(), existing.getParameterTypes())) {
+                    duplicate = true;
+                    break;
+                }
+            }
+            if (!duplicate) {
+                uniqueSignatures.add(m);
+            }
+        }
+
+        if (uniqueSignatures.size() > 1) {
              throw new MockerException(
                     "Ambiguous method call for " + methodName + " with args " + Arrays.deepToString(args) +
-                            ". Candidates: " + matched);
+                            ". Multiple distinct candidates found: " + uniqueSignatures);
         }
-        this.method = matched.get(0);
+        this.method = uniqueSignatures.get(0);
     }
 
     private void register(Answer<?> answer) {

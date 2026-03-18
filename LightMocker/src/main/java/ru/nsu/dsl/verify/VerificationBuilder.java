@@ -93,34 +93,60 @@ public class VerificationBuilder {
     private void ensureMethodResolved() {
         if (method != null) return;
 
-        if (candidates.size() == 1) {
-            this.method = candidates.get(0);
-        } else if (argsFilter != null) {
+        if (argsFilter != null) {
             resolveMethodByArgs();
+            return;
+        }
+
+        // De-duplicate candidates by signature
+        List<Method> uniqueSignatures = deduplicate(candidates);
+
+        if (uniqueSignatures.size() == 1) {
+            this.method = uniqueSignatures.get(0);
         } else {
              throw new MockerException(
                     "Ambiguous verification for method '" + methodName +
                     "'. Multiple overloads found and no arguments specified to disambiguate. " +
-                    "Candidates: " + candidates);
+                    "Candidates: " + uniqueSignatures);
         }
     }
 
     private void resolveMethodByArgs() {
-        List<Method> matched = candidates.stream()
+        List<Method> compatible = candidates.stream()
                 .filter(m -> MethodUtils.isCompatible(m, argsFilter))
                 .toList();
 
-        if (matched.isEmpty()) {
+        if (compatible.isEmpty()) {
              throw new MockerException(
                     "No method found for " + methodName + " compatible with args " + Arrays.deepToString(argsFilter) +
                     " on " + mock.getClass().getName());
         }
-        if (matched.size() > 1) {
+
+        List<Method> uniqueSignatures = deduplicate(compatible);
+
+        if (uniqueSignatures.size() > 1) {
              throw new MockerException(
                     "Ambiguous verification for " + methodName + " with args " + Arrays.deepToString(argsFilter) +
-                            ". Candidates: " + matched);
+                            ". Multiple distinct candidates found: " + uniqueSignatures);
         }
-        this.method = matched.get(0);
+        this.method = uniqueSignatures.get(0);
+    }
+
+    private List<Method> deduplicate(List<Method> methods) {
+        List<Method> uniqueSignatures = new ArrayList<>();
+        for (Method m : methods) {
+            boolean duplicate = false;
+            for (Method existing : uniqueSignatures) {
+                if (Arrays.equals(m.getParameterTypes(), existing.getParameterTypes())) {
+                    duplicate = true;
+                    break;
+                }
+            }
+            if (!duplicate) {
+                uniqueSignatures.add(m);
+            }
+        }
+        return uniqueSignatures;
     }
 
     int matchingCount() {

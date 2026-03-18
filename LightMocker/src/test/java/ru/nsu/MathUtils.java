@@ -28,5 +28,14 @@ public class MathUtils {
     public static int multiply(int a, int b, double c) {
         return (int) (a * b * c);
     }
+
+    // Instance methods for testing ordinary spies
+    public int addInstance(int a, int b) {
+        return a + b;
+    }
+
+    public String greetInstance(String name) {
+        return "Hello, " + name + "!";
+    }
 }
 

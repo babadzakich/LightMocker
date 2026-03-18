@@ -12,6 +12,10 @@ public class CustomUltimateMocker {
         return MockProxyFactory.createMock(clazz);
     }
 
+    public static <T> T spy(T object) {
+        return MockProxyFactory.createSpy(object);
+    }
+
     public static SetupBuilder<?> setup(Object mock, String methodName, Class<?>... paramTypes) {
         return new SetupBuilder<>(mock, methodName, paramTypes);
     }
