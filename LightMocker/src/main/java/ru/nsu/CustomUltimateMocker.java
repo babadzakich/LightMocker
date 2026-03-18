@@ -1,7 +1,10 @@
 package ru.nsu;
 
+import ru.nsu.core.model.Invocation;
+import ru.nsu.core.proxy.MockProxy;
 import ru.nsu.core.proxy.MockProxyFactory;
 import ru.nsu.dsl.setup.SetupBuilder;
+import ru.nsu.staticmock.StaticMock;
 import ru.nsu.dsl.verify.VerificationBuilder;
 import ru.nsu.exception.MockerException;
 
@@ -40,5 +43,8 @@ public class CustomUltimateMocker {
                     + " with params " + Arrays.toString(paramTypes)
                     + " on " + mock.getClass().getName());
         }
+    }
+    public static StaticMock mockStatic(Class<?> clazz) {
+        return StaticMock.mock(clazz);
     }
 }

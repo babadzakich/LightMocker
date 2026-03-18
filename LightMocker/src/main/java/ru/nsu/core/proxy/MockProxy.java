@@ -2,8 +2,6 @@ package ru.nsu.core.proxy;
 
 import ru.nsu.core.model.Invocation;
 import ru.nsu.core.model.StubRule;
-import ru.nsu.core.registry.InvocationRegistry;
-import ru.nsu.core.registry.StubRegistry;
 import ru.nsu.core.state.MockState;
 
 import java.lang.reflect.InvocationHandler;
@@ -11,6 +9,9 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 
 public class MockProxy implements InvocationHandler {
+    private final MockState state = MockState.getInstance();
+
+    private static final ThreadLocal<Invocation> lastInvocation = new ThreadLocal<>();
 
     private final InvocationRegistry invocationRegistry = MockState.getInstance().getInvocationRegistry();
     private final StubRegistry stubRegistry = MockState.getInstance().getStubRegistry();
