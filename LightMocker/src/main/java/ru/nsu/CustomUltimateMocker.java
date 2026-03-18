@@ -1,5 +1,7 @@
 package ru.nsu;
 
+import ru.nsu.core.model.Invocation;
+import ru.nsu.core.proxy.MockProxy;
 import ru.nsu.core.proxy.MockProxyFactory;
 
 import ru.nsu.dsl.ref.MethodRef;
@@ -25,7 +27,6 @@ public class CustomUltimateMocker {
         return createSetup(mock, ref);
     }
 
-    //тут я хз как назвать, т.к. иначе ide ругается на двусмысленность
     public static <T, P1, R> SetupBuilder<T, R> setup2(T mock, MethodRef1<T, P1, R> ref) {
         return createSetup(mock, ref);
     }
@@ -34,6 +35,17 @@ public class CustomUltimateMocker {
         return new SetupBuilder<>(mock, lambda);
     }
 
+    public <R> SetupBuilder<?, R> setup(R value) {
+
+        Invocation invocation = MockProxy.getLastInvocation();
+        Object mock = MockProxy.getLastMock();
+
+        if (invocation == null || mock == null) {
+            throw new IllegalStateException("Error during setup");
+        }
+
+        return new SetupBuilder<>(mock, invocation);
+    }
     // ── Static mocking ────────────────────────────────────────────────────────
 
     /**

@@ -3,6 +3,7 @@ package ru.nsu.dsl.setup;
 import ru.nsu.core.answer.Returns;
 import ru.nsu.core.answer.ThrowsException;
 import ru.nsu.core.answer.Answer;
+import ru.nsu.core.model.Invocation;
 import ru.nsu.core.model.StubRule;
 import ru.nsu.core.state.MockState;
 import ru.nsu.dsl.ref.MethodRefExtractor;
@@ -15,17 +16,21 @@ public class SetupBuilder<T, R> {
     private final Object mock;
     private final Method method;
     private Object[] args = new Object[0];
-
-    // через method reference (0-арные методы)
     public SetupBuilder(Object mock, Serializable lambda) {
         this.mock = mock;
         this.method = MethodRefExtractor.extract(lambda);
     }
 
-    // через имя метода + типы параметров (любые методы)
+
     public SetupBuilder(Object mock, String methodName, Class<?>... paramTypes) {
         this.mock = mock;
         this.method = resolveMethod(mock, methodName, paramTypes);
+    }
+
+    public SetupBuilder(Object mock, Invocation invocation) {
+        this.mock = mock;
+        this.method = invocation.getMethod();
+        this.args = invocation.getArgs();
     }
 
     public SetupBuilder<T, R> withArgs(Object... args) {
