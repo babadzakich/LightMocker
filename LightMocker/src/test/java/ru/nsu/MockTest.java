@@ -48,4 +48,29 @@ public class MockTest {
         verify(mockList, "get", int.class).withArgs(-1).atMost(1);
         verify(mockList, "clear").never();
     }
+
+    @Test
+    void testSmartSetup() {
+        List<String> mockList = create(List.class);
+
+        // Smart setup: infer "get(int)" from args
+        setup(mockList, "get")
+                .withArgs(0)
+                .returns("Smart!");
+
+        // Smart setup: infer "size()" from no args (default)
+        setup(mockList, "size")
+                .returns(10);
+
+        // Smart setup: infer "add(Object)" from args
+        setup(mockList, "add")
+                .withArgs("element")
+                .returns(true);
+
+        org.junit.jupiter.api.Assertions.assertEquals("Smart!", mockList.get(0));
+        org.junit.jupiter.api.Assertions.assertEquals(10, mockList.size());
+        org.junit.jupiter.api.Assertions.assertTrue(mockList.add("element"));
+
+        verify(mockList, "get").withArgs(0).once();
+    }
 }

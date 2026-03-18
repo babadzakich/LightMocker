@@ -6,26 +6,47 @@ import ru.nsu.core.state.MockState;
 import ru.nsu.exception.MockerException;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+
+import ru.nsu.core.util.MethodUtils;
 
 public class VerificationBuilder {
     private final Object mock;
-    private final Method method;
+    private final String methodName;
+    private Method method;
+    private final List<Method> candidates;
     private Object[] argsFilter;
 
-    public VerificationBuilder(Object mock, Method method) {
+    public VerificationBuilder(Object mock, String methodName, Class<?>... paramTypes) {
         this.mock = mock;
-        this.method = method;
+        this.methodName = methodName;
+
+        if (paramTypes != null && paramTypes.length > 0) {
+            this.method = resolveMethodStrict(mock, methodName, paramTypes);
+            this.candidates = null;
+        } else {
+            this.candidates = collectCandidates(mock, methodName);
+            if (candidates.isEmpty()) {
+                throw new MockerException("Method not found: " + methodName + " on " + mock.getClass().getName());
+            }
+            this.method = null;
+        }
     }
 
     public VerificationBuilder withArgs(Object... args) {
         this.argsFilter = args;
+        if (method == null) {
+            resolveMethodByArgs();
+        }
         return this;
     }
 
     public void times(int expectedCalls) {
+        ensureMethodResolved();
         if (expectedCalls < 0) {
             throw new MockerException("times(n): n must be >= 0");
         }
@@ -44,6 +65,7 @@ public class VerificationBuilder {
     }
 
     public void atLeast(int minCalls) {
+        ensureMethodResolved();
         if (minCalls < 0) {
             throw new MockerException("atLeast(n): n must be >= 0");
         }
@@ -54,6 +76,7 @@ public class VerificationBuilder {
     }
 
     public void atMost(int maxCalls) {
+        ensureMethodResolved();
         if (maxCalls < 0) {
             throw new MockerException("atMost(n): n must be >= 0");
         }
@@ -65,6 +88,39 @@ public class VerificationBuilder {
 
     public CalledBuilder called() {
         return new CalledBuilder(this);
+    }
+
+    private void ensureMethodResolved() {
+        if (method != null) return;
+
+        if (candidates.size() == 1) {
+            this.method = candidates.get(0);
+        } else if (argsFilter != null) {
+            resolveMethodByArgs();
+        } else {
+             throw new MockerException(
+                    "Ambiguous verification for method '" + methodName +
+                    "'. Multiple overloads found and no arguments specified to disambiguate. " +
+                    "Candidates: " + candidates);
+        }
+    }
+
+    private void resolveMethodByArgs() {
+        List<Method> matched = candidates.stream()
+                .filter(m -> MethodUtils.isCompatible(m, argsFilter))
+                .toList();
+
+        if (matched.isEmpty()) {
+             throw new MockerException(
+                    "No method found for " + methodName + " compatible with args " + Arrays.deepToString(argsFilter) +
+                    " on " + mock.getClass().getName());
+        }
+        if (matched.size() > 1) {
+             throw new MockerException(
+                    "Ambiguous verification for " + methodName + " with args " + Arrays.deepToString(argsFilter) +
+                            ". Candidates: " + matched);
+        }
+        this.method = matched.get(0);
     }
 
     int matchingCount() {
@@ -104,5 +160,44 @@ public class VerificationBuilder {
             copy[i] = Objects.requireNonNullElse(args[i], null);
         }
         return copy;
+    }
+
+    private static Method resolveMethodStrict(Object mock, String methodName, Class<?>... paramTypes) {
+        Class<?> clazz = mock.getClass();
+        while (clazz != null) {
+            try {
+                return clazz.getDeclaredMethod(methodName, paramTypes);
+            } catch (NoSuchMethodException e) {
+                // keep searching in superclass chain
+            }
+            clazz = clazz.getSuperclass();
+        }
+        try {
+            return mock.getClass().getMethod(methodName, paramTypes);
+        } catch (NoSuchMethodException e) {
+            throw new MockerException("Method not found: " + methodName
+                    + " with params " + java.util.Arrays.toString(paramTypes)
+                    + " on " + mock.getClass().getName());
+        }
+    }
+
+    private static List<Method> collectCandidates(Object mock, String methodName) {
+        List<Method> candidates = new ArrayList<>();
+        Class<?> clazz = mock.getClass();
+
+        while (clazz != null) {
+            for (Method m : clazz.getDeclaredMethods()) {
+                if (m.getName().equals(methodName)) {
+                    candidates.add(m);
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+        for(Method m : mock.getClass().getMethods()) {
+             if (m.getName().equals(methodName)) {
+                 candidates.add(m);
+             }
+        }
+        return candidates.stream().distinct().collect(Collectors.toList());
     }
 }

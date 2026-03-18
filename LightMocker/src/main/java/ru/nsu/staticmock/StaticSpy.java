@@ -6,16 +6,23 @@ import ru.nsu.core.model.StubRule;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-public class StaticMock implements AutoCloseable {
+/**
+ * Scope-based static spy. No Java agent, no bytecode rewriting.
+ * All calls go through {@link #invoke(String, Object...)}.
+ * <p>
+ * If a method is stubbed, the stub is executed.
+ * If not, the real static method is called.
+ */
+public class StaticSpy implements AutoCloseable {
 
     private final Class<?> targetClass;
 
-    private StaticMock(Class<?> targetClass) {
+    private StaticSpy(Class<?> targetClass) {
         this.targetClass = targetClass;
     }
 
-    public static StaticMock mock(Class<?> clazz) {
-        return new StaticMock(clazz);
+    public static StaticSpy spy(Class<?> clazz) {
+        return new StaticSpy(clazz);
     }
 
     public Class<?> getTargetClass() {
@@ -49,7 +56,7 @@ public class StaticMock implements AutoCloseable {
     }
 
     /**
-     * Invokes a static method through the mock.
+     * Invokes a static method through the spy.
      * If a matching stub exists — returns the stubbed value.
      * Otherwise — calls the real method.
      */
@@ -66,23 +73,9 @@ public class StaticMock implements AutoCloseable {
             return (R) rule.get().getAnswer().answer(invocation);
         }
 
-        // No stub → return default value (strict mock behavior)
-        return (R) getDefaultValue(method.getReturnType());
-    }
-
-    private Object getDefaultValue(Class<?> returnType) {
-        if (!returnType.isPrimitive()) {
-            return null;
-        }
-        if (returnType == boolean.class) return false;
-        if (returnType == char.class) return '\u0000';
-        if (returnType == byte.class) return (byte) 0;
-        if (returnType == short.class) return (short) 0;
-        if (returnType == int.class) return 0;
-        if (returnType == long.class) return 0L;
-        if (returnType == float.class) return 0.0f;
-        if (returnType == double.class) return 0.0d;
-        return null; // For void
+        // Spy behavior: call real method
+        method.setAccessible(true);
+        return (R) method.invoke(null, safeArgs);
     }
 
     @Override
