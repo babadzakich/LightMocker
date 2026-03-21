@@ -8,10 +8,18 @@ import java.lang.reflect.Proxy;
 
 public class MockProxyFactory {
 
-    @SuppressWarnings("unchecked")
     public static <T> T createMock(Class<T> clazz) {
-        MockProxy handler = new MockProxy();
+        return createProxy(clazz, new MockProxy());
+    }
 
+    public static <T> T createSpy(T target) {
+        @SuppressWarnings("unchecked")
+        Class<T> clazz = (Class<T>) target.getClass();
+        return createProxy(clazz, new MockProxy(target));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T createProxy(Class<T> clazz, MockProxy handler) {
         if (clazz.isInterface()) {
             return (T) Proxy.newProxyInstance(
                     clazz.getClassLoader(),
@@ -30,10 +38,8 @@ public class MockProxyFactory {
                         .getDeclaredConstructor()
                         .newInstance();
             } catch (Exception e) {
-                System.err.println("Failed to mock class: " + clazz.getName() + " " + e.getMessage());
-                return null;
+                throw new ru.nsu.exception.MockerException("Failed to create proxy for " + clazz.getName() + " " + e.getMessage());
             }
         }
-
     }
 }
