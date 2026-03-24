@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.nsu.CustomUltimateMocker.create;
 import static ru.nsu.CustomUltimateMocker.setup;
 import static ru.nsu.CustomUltimateMocker.verify;
@@ -32,7 +34,6 @@ public class MockTest {
         System.out.println("size " + mockList.size());
         System.out.println("elem 0 " + mockList.get(0));
         System.out.println("elem 1 " + mockList.get(1));
-
         System.out.println("elem 5 " + mockList.get(5));
 
         try {
@@ -67,9 +68,9 @@ public class MockTest {
                 .withArgs("element")
                 .returns(true);
 
-        org.junit.jupiter.api.Assertions.assertEquals("Smart!", mockList.get(0));
-        org.junit.jupiter.api.Assertions.assertEquals(10, mockList.size());
-        org.junit.jupiter.api.Assertions.assertTrue(mockList.add("element"));
+        assertEquals("Smart!", mockList.get(0));
+        assertEquals(10, mockList.size());
+        assertTrue(mockList.add("element"));
 
         verify(mockList, "get").withArgs(0).once();
     }

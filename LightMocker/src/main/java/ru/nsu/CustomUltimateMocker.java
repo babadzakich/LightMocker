@@ -1,6 +1,8 @@
 package ru.nsu;
 
 import ru.nsu.core.proxy.MockProxyFactory;
+import ru.nsu.core.proxy.MockProxy;
+import ru.nsu.core.model.Invocation;
 import ru.nsu.dsl.setup.SetupBuilder;
 import ru.nsu.dsl.verify.InOrder;
 import ru.nsu.staticmock.StaticMock;
@@ -31,6 +33,17 @@ public class CustomUltimateMocker {
 
     public static StaticMock mockStatic(Class<?> clazz) {
         return StaticMock.mock(clazz);
+    }
+
+    public static <R> SetupBuilder<R> when(R value) {
+        Invocation invocation = MockProxy.getLastInvocation();
+        Object mock = MockProxy.getLastMock();
+
+        if (invocation == null) {
+            throw new IllegalStateException("Сначала вызови метод у мока!");
+        }
+
+        return new SetupBuilder<>(mock, invocation);
     }
 
     public static StaticSpy spyStatic(Class<?> clazz) {

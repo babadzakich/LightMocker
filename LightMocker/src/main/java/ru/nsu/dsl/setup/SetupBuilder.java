@@ -3,6 +3,7 @@ package ru.nsu.dsl.setup;
 import ru.nsu.core.answer.Answer;
 import ru.nsu.core.answer.Returns;
 import ru.nsu.core.answer.ThrowsException;
+import ru.nsu.core.model.Invocation;
 import ru.nsu.core.model.StubRule;
 import ru.nsu.core.state.MockState;
 import ru.nsu.exception.MockerException;
@@ -35,6 +36,14 @@ public class SetupBuilder<R> {
             }
             this.method = null;
         }
+    }
+
+    public SetupBuilder(Object mock, Invocation invocation) {
+        this.mock = mock;
+        this.method = invocation.getMethod();
+        this.args = invocation.getArgs();
+        methodName = invocation.getMethod().getName();
+        candidates = collectCandidates(mock, methodName);
     }
 
     public SetupBuilder<R> withArgs(Object... args) {

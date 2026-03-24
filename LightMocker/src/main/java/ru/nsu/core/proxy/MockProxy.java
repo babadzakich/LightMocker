@@ -11,6 +11,22 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 
 public class MockProxy implements InvocationHandler {
+
+    private final MockState state = MockState.getInstance();
+
+    private static final ThreadLocal<Invocation> lastInvocation = new ThreadLocal<>();
+
+
+    private static final ThreadLocal<Object> lastMock = new ThreadLocal<>();
+
+    public static Invocation getLastInvocation() {
+        Invocation inv = lastInvocation.get();
+        lastInvocation.remove(); // Забираем один раз
+        return inv;
+    }
+    public static Object getLastMock() {
+        return lastMock.get();
+    }
     private final InvocationRegistry invocationRegistry = MockState.getInstance().getInvocationRegistry();
     private final StubRegistry stubRegistry = MockState.getInstance().getStubRegistry();
     private final Object target;
@@ -26,6 +42,9 @@ public class MockProxy implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         // Handle Object methods explicitly to keep proxy identity/hash stable in registries.
+
+
+
         if (method.getDeclaringClass() == Object.class) {
             String name = method.getName();
             switch (name) {
@@ -44,6 +63,9 @@ public class MockProxy implements InvocationHandler {
 
         Invocation invocation = new Invocation(proxy, method, args);
         invocationRegistry.registerInvocation(proxy, invocation);
+
+        lastInvocation.set(invocation);
+        lastMock.set(proxy);
 
         Optional<StubRule> rule = stubRegistry.findMatchingRule(proxy, invocation);
 
