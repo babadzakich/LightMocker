@@ -9,6 +9,7 @@ public class StaticMock implements AutoCloseable {
     private StaticMock(Class<?> targetClass) {
         this.targetClass = targetClass;
         StaticMockRegistry.activateMock(targetClass);
+        StaticMockSupport.redefineForStaticMock(targetClass);
     }
 
     public static StaticMock mock(Class<?> clazz) {
@@ -55,13 +56,13 @@ public class StaticMock implements AutoCloseable {
         Object[] safeArgs = args != null ? args : new Object[0];
         Method method = resolveMethod(methodName, safeArgs);
         method.setAccessible(true);
-
         return (R) method.invoke(null, safeArgs);
     }
 
     @Override
     public void close() {
         StaticMockRegistry.clear(targetClass);
+        StaticMockSupport.restoreOriginalClass(targetClass);
     }
 
     private Method resolveMethod(String methodName, Object[] args) {

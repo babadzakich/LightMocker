@@ -67,7 +67,7 @@ public class StaticMockTest {
                     .withArgs(0, 0)
                     .thenThrow(new ArithmeticException("mocked error"));
 
-            assertThrows(RuntimeException.class, () -> MathUtils.add(0, 0));
+            assertThrows(ArithmeticException.class, () -> MathUtils.add(0, 0));
         }
     }
 

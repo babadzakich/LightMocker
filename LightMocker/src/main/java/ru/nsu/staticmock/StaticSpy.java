@@ -16,6 +16,7 @@ public class StaticSpy implements AutoCloseable {
     private StaticSpy(Class<?> targetClass) {
         this.targetClass = targetClass;
         StaticMockRegistry.activateSpy(targetClass);
+        StaticMockSupport.redefineForStaticMock(targetClass);
     }
 
     public static StaticSpy spy(Class<?> clazz) {
@@ -68,6 +69,7 @@ public class StaticSpy implements AutoCloseable {
     @Override
     public void close() {
         StaticMockRegistry.clear(targetClass);
+        StaticMockSupport.restoreOriginalClass(targetClass);
     }
 
     private Method resolveMethod(String methodName, Object[] args) {

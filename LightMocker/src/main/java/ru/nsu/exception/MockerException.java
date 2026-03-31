@@ -4,4 +4,8 @@ public class MockerException extends RuntimeException {
     public MockerException(String message) {
         super(message);
     }
+
+    public MockerException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
