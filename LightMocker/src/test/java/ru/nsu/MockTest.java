@@ -43,10 +43,10 @@ public class MockTest {
         }
 
         verify(mockList, "size").once();
-        verify(mockList, "get", int.class).withArgs(0).once();
-        verify(mockList, "get", int.class).withArgs(1).times(1);
-        verify(mockList, "get", int.class).withArgs(5).atLeast(1);
-        verify(mockList, "get", int.class).withArgs(-1).atMost(1);
+        verify(mockList, "get").withArgs(0).once();
+        verify(mockList, "get").withArgs(1).times(1);
+        verify(mockList, "get").withArgs(5).atLeast(1);
+        verify(mockList, "get").withArgs(-1).atMost(1);
         verify(mockList, "clear").never();
     }
 

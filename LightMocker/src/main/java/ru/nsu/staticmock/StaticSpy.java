@@ -1,10 +1,6 @@
 package ru.nsu.staticmock;
 
-import ru.nsu.core.model.Invocation;
-import ru.nsu.core.model.StubRule;
-
 import java.lang.reflect.Method;
-import java.util.Optional;
 
 /**
  * Scope-based static spy. No Java agent, no bytecode rewriting.
@@ -19,6 +15,7 @@ public class StaticSpy implements AutoCloseable {
 
     private StaticSpy(Class<?> targetClass) {
         this.targetClass = targetClass;
+        StaticMockRegistry.activateSpy(targetClass);
     }
 
     public static StaticSpy spy(Class<?> clazz) {
@@ -64,16 +61,6 @@ public class StaticSpy implements AutoCloseable {
     public <R> R invoke(String methodName, Object... args) throws Throwable {
         Object[] safeArgs = args != null ? args : new Object[0];
         Method method = resolveMethod(methodName, safeArgs);
-
-        Invocation invocation = new Invocation(targetClass, method, safeArgs);
-        StaticMockRegistry.registerInvocation(targetClass, invocation);
-
-        Optional<StubRule> rule = StaticMockRegistry.findMatchingRule(targetClass, invocation);
-        if (rule.isPresent()) {
-            return (R) rule.get().getAnswer().answer(invocation);
-        }
-
-        // Spy behavior: call real method
         method.setAccessible(true);
         return (R) method.invoke(null, safeArgs);
     }
@@ -84,25 +71,6 @@ public class StaticSpy implements AutoCloseable {
     }
 
     private Method resolveMethod(String methodName, Object[] args) {
-        java.util.List<Method> candidates = new java.util.ArrayList<>();
-        for (Method m : targetClass.getDeclaredMethods()) {
-            if (m.getName().equals(methodName) && ru.nsu.core.util.MethodUtils.isCompatible(m, args)) {
-                candidates.add(m);
-            }
-        }
-
-        if (candidates.isEmpty()) {
-            throw new ru.nsu.exception.MockerException(
-                    "Static method not found: " + methodName
-                            + " compatible with args " + java.util.Arrays.toString(args) + " on " + targetClass.getName());
-        }
-
-        if (candidates.size() > 1) {
-            throw new ru.nsu.exception.MockerException(
-                    "Ambiguous static method call: " + methodName
-                            + " with args " + java.util.Arrays.toString(args) + " matches multiple candidates: " + candidates);
-        }
-
-        return candidates.get(0);
+        return StaticMockSupport.resolveMethod(targetClass, methodName, args);
     }
 }

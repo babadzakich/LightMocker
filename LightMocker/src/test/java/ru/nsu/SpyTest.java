@@ -25,7 +25,8 @@ public class SpyTest {
         // 3. Другие методы все еще работают реально
         spyList.add("second");
         // Проверяем оригинал (так как спай делегирует ему)
-        assertEquals(2, list.size()); 
+        assertEquals(2, list.size());
+        assertEquals(100, spyList.size());
         
         // 4. Верификация
         verify(spyList, "add").withArgs("second").once();

@@ -21,14 +21,14 @@ public class MockProxy implements InvocationHandler {
 
     public static Invocation getLastInvocation() {
         Invocation inv = lastInvocation.get();
-        lastInvocation.remove(); // Забираем один раз
+        lastInvocation.remove();
         return inv;
     }
     public static Object getLastMock() {
         return lastMock.get();
     }
-    private final InvocationRegistry invocationRegistry = MockState.getInstance().getInvocationRegistry();
-    private final StubRegistry stubRegistry = MockState.getInstance().getStubRegistry();
+    private final InvocationRegistry invocationRegistry = state.getInvocationRegistry();
+    private final StubRegistry stubRegistry = state.getStubRegistry();
     private final Object target;
 
     public MockProxy() {
@@ -41,10 +41,6 @@ public class MockProxy implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        // Handle Object methods explicitly to keep proxy identity/hash stable in registries.
-
-
-
         if (method.getDeclaringClass() == Object.class) {
             String name = method.getName();
             switch (name) {
